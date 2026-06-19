@@ -122,7 +122,8 @@ First-Year AIML Student passionate about Artificial Intelligence, Machine Learni
 ⭐ Support
 
 If you found this project useful, consider giving the repository a star and sharing feedback.
-<img width="1512" height="770" alt="Screenshot 2026-06-19 at 9 03 14 PM" src="https://github.com/user-attachments/assets/4002294c-1a75-4393-ad1d-3c8aedfed7b6" />
-<img width="1512" height="770" alt="Screenshot 2026-06-19 at 9 03 03 PM" src="https://github.com/user-attachments/assets/33a650a7-0b8c-436b-b1a2-d23ff767a766" />
-<img width="1512" height="828" alt="Screenshot 2026-06-19 at 9 02 44 PM" src="https://github.com/user-attachments/assets/6a57da55-48c1-4c40-b00c-998b1f7d5467" />
-<img width="1512" height="828" alt="Screenshot 2026-06-19 at 8 53 03 PM" src="https://github.com/user-attachments/assets/c094cab9-b255-493c-900e-d539eb80f564" />
+<img width="1512" height="828" alt="Screenshot 2026-06-19 at 8 53 03 PM" src="https://github.com/user-attachments/assets/b7931165-1e5f-4671-9aa0-b6869d93d66b" />
+<img width="1512" height="828" alt="Screenshot 2026-06-19 at 9 02 44 PM" src="https://github.com/user-attachments/assets/dffaefec-204c-4bbe-9833-79c9beda7fa0" />
+<img width="1512" height="770" alt="Screenshot 2026-06-19 at 9 03 03 PM" src="https://github.com/user-attachments/assets/71c99e1b-c6fc-4c6b-a148-e19f02c7bfbf" />
+<img width="1512" height="770" alt="Screenshot 2026-06-19 at 9 03 14 PM" src="https://github.com/user-attachments/assets/78630aab-b5e3-4d2a-a7c2-b4f865ec789b" />
+
