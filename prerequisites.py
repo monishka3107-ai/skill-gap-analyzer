@@ -1,0 +1,25 @@
+
+
+PREREQS = {
+    "pandas": ["python"],
+    "numpy": ["python"],
+    "data_viz": ["python"],
+    "apis": ["python"],
+    "statistics": ["probability"],
+    "hypothesis_testing": ["statistics"],
+    "regression": ["statistics"],
+    "machine_learning": ["python", "statistics"],
+    "scikit_learn": ["python", "machine_learning"],
+    "deep_learning": ["machine_learning"],
+    "pytorch": ["deep_learning"],
+    "tensorflow": ["deep_learning"],
+    "nlp": ["machine_learning"],
+    "computer_vision": ["deep_learning"],
+    "llm": ["deep_learning"],
+    "generative_ai": ["llm"],
+    "rag": ["llm"],
+    "ai_agents": ["llm"],
+    "etl": ["sql"],
+    "kubernetes": ["docker"],
+    "mlops": ["docker", "machine_learning"],
+}
