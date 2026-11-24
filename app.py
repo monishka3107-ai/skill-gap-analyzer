@@ -6,8 +6,11 @@ from skills import SKILLS
 from roles import ROLES
 from matcher import detect_skills
 from analyzer import analyze_gap
-from roadmap import build_roadmap
+from roadmap import build_roadmap, phase_of
 from resources import RESOURCES
+from parser import extract_text
+from report import build_report
+import progress
 
 
 def nice(skill_id):
@@ -126,6 +129,10 @@ div[data-baseweb="select"] > div:focus-within {
 .chip { display:inline-block; background:#FFE08A; border:2px solid #28303D;
     color:#28303D; font-weight:700; padding:3px 12px; border-radius:999px;
     font-size:0.85rem; margin:5px 6px 0 0; box-shadow:2px 2px 0 rgba(40,48,61,0.15); }
+.chip.partial { background:#D9F5F1; border-style:dashed; }
+.chip.miss { background:#FFFFFF; color:#54606f; }
+.card.done { opacity:0.6; }
+.phase { font-family:'Caveat',cursive; font-weight:700; font-size:1.7rem; color:#6C5CE7; margin:8px 0 4px -30px; }
 
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -155,19 +162,59 @@ role_names = {ROLES[rid]["name"]: rid for rid in ROLES}
 chosen_name = st.selectbox("Target role", list(role_names.keys()))
 role_id = role_names[chosen_name]
 
+resume = st.file_uploader("Upload your resume (optional)", type=["pdf", "docx", "txt"])
 user_text = st.text_area(
     "Your current skills (or paste resume text)",
     placeholder="e.g. I know Python, SQL and Excel...",
     height=140,
 )
 
+resume_text = ""
+if resume:
+    try:
+        resume_text = extract_text(resume.name, resume.getvalue())
+    except Exception as e:   # corrupt/encrypted files: tell the user, keep the app running
+        st.error(f"Couldn't read {resume.name}: {e}")
+    else:
+        if not resume_text.strip():
+            st.warning("No text found in that file — scanned PDFs need to be pasted as text instead.")
+
+
+def toggle_done(skill):
+    done = progress.load()
+    done ^= {skill}
+    progress.save(done)
+
+
 # ---------------- Run ----------------
+# Remember that Analyze was pressed, so ticking a checkbox (which reruns the script) keeps results on screen
 if st.button("Analyze"):
-    if not user_text.strip():
+    st.session_state.analyzed = True
+
+full_text = f"{resume_text}\n{user_text}"
+if st.session_state.get("analyzed"):
+    if not full_text.strip():
         st.warning("Add a few skills first so I have something to work with.")
     else:
-        user_skills = detect_skills(user_text)
-        result = analyze_gap(role_id, user_skills)
+        evidence = detect_skills(full_text)
+
+        st.subheader("Confirm your skills")
+        confirmed = set(st.multiselect(
+            "Detected from your text — add anything we missed, remove anything wrong",
+            options=sorted(SKILLS, key=nice),
+            default=sorted(evidence, key=nice),
+            format_func=nice,
+        ))
+        if evidence:
+            with st.expander("Why we detected these"):
+                for s in sorted(evidence, key=nice):
+                    st.text(f"{nice(s)}: …{evidence[s]}…")
+
+        done = progress.load()
+        required = ROLES[role_id]["skills"]
+        plan = analyze_gap(role_id, confirmed)              # roadmap is planned from your starting point
+        result = analyze_gap(role_id, confirmed | done)     # readiness counts what you've completed since
+        roadmap = build_roadmap(plan["ranked_missing"] + list(plan["partial"]), confirmed, required)
 
         st.subheader("How ready are you?")
         st.markdown(f"""
@@ -176,6 +223,12 @@ if st.button("Analyze"):
           <div class="ready-track"><div class="ready-fill" style="--w:{result['readiness']}%"></div></div>
         </div>
         """, unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        c1.metric("Core skills", f"{result['core']}%", help="Readiness on the role's highest-weight skills")
+        c2.metric("Roadmap progress", f"{len(done & set(roadmap))}/{len(roadmap)} steps")
+        with st.expander("Readiness by category"):
+            for cat, pct in sorted(result["by_category"].items(), key=lambda kv: kv[1]):
+                st.progress(pct / 100, text=f"{cat} — {pct}%")
 
         st.subheader("Skills you already have")
         if result["have"]:
@@ -184,24 +237,55 @@ if st.button("Analyze"):
         else:
             st.markdown("<p>None detected yet — that's fine, everyone starts somewhere.</p>", unsafe_allow_html=True)
 
-        st.subheader("Your learning roadmap")
-        roadmap = build_roadmap(result["ranked_missing"], result["have"])
+        if result["partial"]:
+            st.subheader("Partially there")
+            chips = "".join(f"<span class='chip partial'>{icon_for(s)} {nice(s)} · via {nice(b)}</span>"
+                            for s, b in result["partial"].items())
+            st.markdown(chips, unsafe_allow_html=True)
 
+        if result["missing"]:
+            st.subheader("Missing for this role")
+            chips = "".join(f"<span class='chip miss'>{icon_for(s)} {nice(s)}</span>" for s in result["ranked_missing"])
+            st.markdown(chips, unsafe_allow_html=True)
+
+        st.subheader("Your learning roadmap")
         if not roadmap:
             st.success("Nothing missing for this role — you're ready to apply. 🎉")
         else:
+            hours = sum(RESOURCES.get(s, {}).get("hours", 0) for s in roadmap)
+            st.caption(f"{len(roadmap)} steps · about {hours} hours of focused learning")
             st.markdown("<div class='path'>", unsafe_allow_html=True)
+            last_phase = None
             for i, skill in enumerate(roadmap, 1):
+                phase = phase_of(skill, confirmed)
+                if phase != last_phase:
+                    st.markdown(f"<div class='phase'>{phase}</div>", unsafe_allow_html=True)
+                    last_phase = phase
                 info = RESOURCES.get(skill, {})
                 resource = info.get("resource", "No resource added yet.")
                 project = info.get("project", "—")
+                note = ""
+                if skill in plan["partial"]:
+                    note = f"<br><b>Head start:</b> you know {nice(plan['partial'][skill])}"
+                elif skill not in required:
+                    note = "<br><b>Why:</b> prerequisite for a later step"
                 delay = (i - 1) * 0.06
                 st.markdown(f"""
-                <div class="card" style="animation-delay:{delay}s">
+                <div class="card{' done' if skill in done else ''}" style="animation-delay:{delay}s">
                     <div class="bub">{i}</div>
                     <div class="step">{icon_for(skill)} {nice(skill)}</div>
                     <div class="meta"><b>Learn with:</b> {resource}<br>
-                    <b>Build this:</b> {project}</div>
+                    <b>Build this:</b> {project}<br>
+                    <b>Time:</b> ~{info.get('hours', '?')} h{note}</div>
                 </div>
                 """, unsafe_allow_html=True)
+                st.checkbox("Mark as done", value=skill in done, key=f"done_{skill}",
+                            on_change=toggle_done, args=(skill,))
             st.markdown("</div>", unsafe_allow_html=True)
+
+        st.download_button(
+            "Download career report",
+            build_report(chosen_name, result, roadmap, confirmed, done, evidence),
+            file_name=f"career_report_{role_id}.md",
+            mime="text/markdown",
+        )

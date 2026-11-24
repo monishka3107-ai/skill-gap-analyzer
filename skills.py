@@ -6,7 +6,7 @@ SKILLS = {
     # ---------- Programming & Core ----------
     "python": {
         "name": "Python",
-        "aliases": ["python", "python3", "py"],
+        "aliases": ["python", "python3"],
         "category": "Programming",
     },
     "sql": {
@@ -33,12 +33,12 @@ SKILLS = {
     # ---------- Data Handling ----------
     "pandas": {
         "name": "Pandas",
-        "aliases": ["pandas", "pd"],
+        "aliases": ["pandas"],
         "category": "Data Handling",
     },
     "numpy": {
         "name": "NumPy",
-        "aliases": ["numpy", "np"],
+        "aliases": ["numpy"],
         "category": "Data Handling",
     },
     "data_cleaning": {
@@ -114,7 +114,7 @@ SKILLS = {
     },
     "deep_learning": {
         "name": "Deep Learning",
-        "aliases": ["deep learning", "neural networks", "dl"],
+        "aliases": ["deep learning", "neural networks"],
         "category": "Machine Learning",
     },
     "pytorch": {
@@ -124,7 +124,7 @@ SKILLS = {
     },
     "tensorflow": {
         "name": "TensorFlow",
-        "aliases": ["tensorflow", "tf", "keras"],
+        "aliases": ["tensorflow", "keras"],
         "category": "Machine Learning",
     },
 
@@ -136,7 +136,7 @@ SKILLS = {
     },
     "computer_vision": {
         "name": "Computer Vision",
-        "aliases": ["computer vision", "cv", "image processing", "opencv"],
+        "aliases": ["computer vision", "image processing", "opencv"],
         "category": "AI / GenAI",
     },
     "llm": {
@@ -156,7 +156,7 @@ SKILLS = {
     },
     "ai_agents": {
         "name": "AI Agents",
-        "aliases": ["ai agents", "agents", "agentic", "langchain", "langgraph"],
+        "aliases": ["ai agents", "agentic", "langchain", "langgraph"],
         "category": "AI / GenAI",
     },
     "prompt_engineering": {
@@ -173,7 +173,7 @@ SKILLS = {
     # ---------- Deployment & Infra ----------
     "apis": {
         "name": "APIs / REST",
-        "aliases": ["api", "apis", "rest", "rest api", "fastapi", "flask"],
+        "aliases": ["api", "apis", "rest api", "restful", "fastapi", "flask"],
         "category": "Deployment & Infra",
     },
     "docker": {
@@ -203,4 +203,35 @@ SKILLS = {
         "aliases": ["communication", "data storytelling", "presentation", "stakeholder management"],
         "category": "Soft Skills",
     },
+}
+
+# Adjacent skills: having the value gives partial credit (half weight) for the key.
+RELATED = {
+    "pytorch": ["tensorflow"],
+    "tensorflow": ["pytorch"],
+    "power_bi": ["tableau", "looker"],
+    "tableau": ["power_bi", "looker"],
+    "looker": ["power_bi", "tableau"],
+    "scikit_learn": ["machine_learning"],
+    "machine_learning": ["scikit_learn", "regression"],
+    "deep_learning": ["pytorch", "tensorflow"],
+    "pandas": ["numpy", "excel"],
+    "numpy": ["pandas"],
+    "statistics": ["probability", "hypothesis_testing", "regression"],
+    "probability": ["statistics"],
+    "hypothesis_testing": ["statistics"],
+    "regression": ["statistics"],
+    "data_viz": ["power_bi", "tableau", "looker"],
+    "data_cleaning": ["pandas", "etl"],
+    "etl": ["data_cleaning", "sql"],
+    "llm": ["nlp", "generative_ai"],
+    "generative_ai": ["llm", "prompt_engineering"],
+    "rag": ["vector_db"],
+    "vector_db": ["rag"],
+    "ai_agents": ["llm"],
+    "prompt_engineering": ["generative_ai", "llm"],
+    "kubernetes": ["docker"],
+    "mlops": ["docker", "cloud"],
+    "cloud": ["docker"],
+    "python": ["r", "java"],
 }
